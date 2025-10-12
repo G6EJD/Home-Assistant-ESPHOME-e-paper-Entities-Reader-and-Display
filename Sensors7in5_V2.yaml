@@ -1,0 +1,168 @@
+esphome:
+  name: sensors7in5v2
+  friendly_name: Sensors7in5V2
+
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "xiao"
+  encryption:
+    key: "Ch5PbCIPFGglApwecHWuKu3hptLLasE6qrJ+pMk2Yp8="
+
+ota:
+  - platform: esphome
+    password: "6b84afdcfa9a65140a8b64a45905150d"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Test Fallback Hotspot"
+    password: "gjHS2JW3vPiK"
+
+captive_portal:
+    
+    
+#deep_sleep:
+#  run_duration: 60s #gives time to reset when the IP resolution stage is attempted and enables an OTA update! if shorter needs a esphomeflasher update
+#  sleep_duration: 1min
+  
+font:
+#  - file: "/config/fonts/OpenSans-Regular.ttf"
+#    id: font1
+#    size: 15
+#  - file: "/config/fonts/OpenSans-Bold.ttf"
+#    id: font2
+#    size: 15
+  - file: "/config/fonts/RobotoCondensed-Regular.ttf"
+    id: font2
+    size: 20
+  - file: "/config/fonts/RobotoCondensed-Bold.ttf"
+    id: font3
+    size: 24
+  - file: "/config/fonts/RobotoCondensed-Regular.ttf"
+    id: font4
+    size: 32
+    
+spi:
+  clk_pin: 7 # pins set for XIAO board
+  mosi_pin: 9
+  
+#time:
+#  - platform: sntp
+#    id: sntp_time
+#    timezone: 'Europe/London'
+
+
+time:
+  - platform: homeassistant
+    id: ha_time
+
+sensor:
+  - platform: homeassistant
+    name: CPU Temperature
+    unit_of_measurement: "°C"
+    state_class: "measurement"
+    entity_id: sensor.processor_temperature
+    id: cputemp
+
+  - platform: homeassistant
+    name: outside_temp
+    unit_of_measurement: "°C"
+    state_class: "measurement"
+    entity_id: sensor.openweathermap_temperature
+    id: outside_temp
+
+  - platform: homeassistant
+    name: Grid Power
+    entity_id: sensor.myenergi_harvi_14018745_power_ct_grid
+    id: GridPower
+    
+  - platform: homeassistant
+    name: Generation
+    entity_id: sensor.myenergi_harvi_14018745_power_ct_generation
+    id: SolarPower
+
+  - platform: homeassistant
+    name: PW3
+    entity_id: sensor.myenergi_harvi_14018745_ac_battery_ct3
+    id: BatteryPower
+
+  - platform: homeassistant
+    name: Charge
+    entity_id: sensor.battery_charge
+    id: BatteryCharge
+
+  - platform: homeassistant
+    name: LoadPower
+    entity_id: sensor.load_power
+    id: BatteryLoadPower
+
+    #Waveshare Driver Board
+    #define EPD_SCK_PIN  13
+    #define EPD_MOSI_PIN 14
+    #define EPD_CS_PIN   15
+    #define EPD_RST_PIN  26
+    #define EPD_DC_PIN   27
+    #define EPD_BUSY_PIN 25
+    #define EPD_SCK_PIN  D8
+    
+    # XIAO Driver Board
+    #define EPD_SCK_PIN  7
+    #define EPD_MOSI_PIN 9
+    #define EPD_CS_PIN   2
+    #define EPD_RST_PIN  1
+    #define EPD_DC_PIN   4
+    #define EPD_BUSY_PIN 3
+
+display:
+  - platform: waveshare_epaper # pins set for XIAO board
+    id: waveshare
+    cs_pin: 2
+    dc_pin: 4
+    busy_pin:
+       number: 3
+       inverted : true # Essential for Waveshare 7in5 V2 e-paper to prevent panel damage
+    reset_pin: 1
+    model: 7.50inV2
+    update_interval: 10min
+    rotation: 0
+    lambda: |-
+      it.print(400, 15, id(font3), TextAlign::CENTER, "Sensor Readings");
+
+      auto time = id(ha_time).now();
+      it.strftime(400, 50, id(font2), TextAlign::CENTER, "Updated: %H:%M", time);
+      it.printf(400, 80, id(font2), TextAlign::CENTER, "CPU: %0.1f °C", id(cputemp).state);  
+
+      it.printf(20, 120, id(font4), "Grid Power");
+      it.printf(90, 170, id(font4), TextAlign::CENTER, "%.0f W", id(GridPower).state);
+      
+      it.printf(600, 120, id(font4), "Solar Power");
+      it.printf(680, 170, id(font4), TextAlign::CENTER, "%.0f W", id(SolarPower).state);
+
+      it.printf(20, 200, id(font4), "Battery Power");
+      it.printf(100, 250, id(font4), TextAlign::CENTER, "%.0f W", id(BatteryPower).state);
+
+      it.printf(600, 200, id(font4), "Battery SoC");
+      it.printf(680, 250, id(font4), TextAlign::CENTER, "%.1f%%", id(BatteryCharge).state);  
+      
+      it.printf(20, 280, id(font4), "Battery Load Power");
+      it.printf(100, 330, id(font4), TextAlign::CENTER, "%.0f W", id(BatteryLoadPower).state);
+
+      it.printf(600, 280, id(font4), "N/A");
+      it.printf(400, 460, id(font2), TextAlign::CENTER, "Outside Temp: %0.1f °C", id(outside_temp).state);
+
+#      it.printf(680, 320, id(font4), TextAlign::CENTER, "%.1f%%", id(BatteryCharge).state);     
+#      it.printf(20, 50, id(font3), " CPU Temp: %0.1f °C", id(cputemp).state);  
+#      float cputemp = id(cpu_temp).state;
+
+    
