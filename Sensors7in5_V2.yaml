@@ -125,7 +125,7 @@ sensor:
     #define EPD_BUSY_PIN 3
 
 display:
-  - platform: waveshare_epaper # pins set for XIAO board
+  - platform: waveshare_epaper # pins set for XIAO board, see here: https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/
     id: waveshare
     cs_pin: 2
     dc_pin: 4
