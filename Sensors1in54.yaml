@@ -1,0 +1,147 @@
+esphome:
+  name: sensors1in54
+  friendly_name: Sensors1in54
+
+esp32:
+  board: esp32-s3-devkitc-1 # is this example an XIAO ESP32S3 mounted on an e-paper driver board
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "gHsFE05EfkNVy/CDDU3HSYs87W93u7dhJLEKLKRsLKY="
+
+ota:
+  - platform: esphome
+    password: "7130c7e79d962dbfb5de903987e64224"
+
+wifi:
+  ssid: !secret wifi_ssid # create a file called secret, then enter two lines of wifi_ssid and wifi_password example line wifi_ssid: "yourSSID", repeat for password
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Sensors1In54 Fallback Hotspot"
+    password: "74O2FX8kMNEj"
+
+captive_portal:
+        
+#deep_sleep:
+#  run_duration: 60s #gives time to reset when the IP resolution stage is attempted and enables an OTA update! if shorter needs a esphomeflasher update
+#  sleep_duration: 1min # BUT note it resets the cpu so everthing has to start from a clean boot and that takes some time.
+  
+font:
+#  - file: "/config/fonts/OpenSans-Regular.ttf"
+#    id: font1
+#    size: 15
+#  - file: "/config/fonts/OpenSans-Bold.ttf"
+#    id: font2
+#    size: 15
+  - file: "/config/fonts/RobotoCondensed-Bold.ttf"
+    id: font3
+    size: 15
+  - file: "/config/fonts/RobotoCondensed-Regular.ttf"
+    id: font4
+    size: 32
+
+    #Waveshare e-Paper Driver Board
+    #define EPD_SCK_PIN  13
+    #define EPD_MOSI_PIN 14
+    #define EPD_CS_PIN   15
+    #define EPD_RST_PIN  26
+    #define EPD_DC_PIN   27
+    #define EPD_BUSY_PIN 25
+    #define EPD_SCK_PIN  D8
+    
+    # XIAO e-Paper Driver Board
+    #define EPD_SCK_PIN  7
+    #define EPD_MOSI_PIN 9
+    #define EPD_CS_PIN   2
+    #define EPD_RST_PIN  1
+    #define EPD_DC_PIN   4
+
+spi:
+  clk_pin: 13
+  mosi_pin: 14
+  
+#time:
+#  - platform: sntp
+#    id: sntp_time
+#    timezone: 'Europe/London'
+
+time:
+  - platform: homeassistant
+    id: ha_time
+
+sensor:
+  - platform: homeassistant
+    name: CPU Temperature
+    unit_of_measurement: "°C"
+    state_class: "measurement"
+    entity_id: sensor.processor_temperature # Get the system monitor cpu temperature
+    id: cputemp # The id used to link the value for display
+
+  - platform: homeassistant
+    name: outside_temp
+    unit_of_measurement: "°C"
+    state_class: "measurement"
+    entity_id: sensor.openweathermap_temperature ## Get the OpenWeatherMap outside temperature
+    id: outside_temp # The id used to link the value for display
+
+  - platform: homeassistant
+    name: Grid Power
+    entity_id: sensor.myenergi_harvi_14018745_power_ct_grid
+    id: GridPower # The id used to link the value for display
+    
+  - platform: homeassistant
+    name: Generation
+    entity_id: sensor.myenergi_harvi_14018745_power_ct_generation
+    id: SolarPower # The id used to link the value for display
+
+  - platform: homeassistant
+    name: PW3
+    entity_id: sensor.myenergi_harvi_14018745_ac_battery_ct3
+    id: BatteryPower # The id used to link the value for display
+
+  - platform: homeassistant
+    name: Charge
+    entity_id: sensor.battery_charge
+    id: BatteryCharge # The id used to link the value for display
+
+display:
+  - platform: waveshare_epaper # Pin numbers set for Waveshare driver board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
+    id: waveshare
+    cs_pin: 15
+    dc_pin: 27
+    busy_pin: 25
+    reset_pin: 26
+    model: 1.54in-m5coreink-m09 # You must select the correct chip-set, if needs be go through all variants to find a match
+    update_interval: 2min
+    rotation: 270
+    lambda: |-
+      it.print(50, 0, id(font3), "Sensor Readings");
+
+      auto time = id(ha_time).now();
+      it.strftime(55, 20, id(font3), "Updated: %H:%M", time);
+      it.printf(62, 40, id(font3), " CPU: %0.1f °C", id(cputemp).state);  
+
+      it.printf(5, 70, id(font3), "Grid Power");
+      it.printf(28, 85, id(font3), "%.0f W", id(GridPower).state);
+      
+      it.printf(110, 70, id(font3), "Solar Pwr");
+      it.printf(115, 85, id(font3), "%.0f W", id(SolarPower).state);
+
+      it.printf(5, 110, id(font3), "Battery Pwr");
+      it.printf(22, 125, id(font3), "%.0f W", id(BatteryPower).state);
+
+      it.printf(110, 110, id(font3), "Battery SoC");
+      it.printf(130, 125, id(font3), "%.1f%%", id(BatteryCharge).state);  
+      
+      it.printf(28, 180, id(font3), "Outside Temp: %0.1f °C", id(outside_temp).state);
+
+#      it.printf(20, 50, id(font3), " CPU Temp: %0.1f °C", id(cputemp).state);  
+#      float cputemp = id(cpu_temp).state;
