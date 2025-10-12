@@ -63,7 +63,7 @@ font:
     #define EPD_CS_PIN   2
     #define EPD_RST_PIN  1
     #define EPD_DC_PIN   4
-
+    #define EPD_BUSY_PIN 3
 spi:
   clk_pin: 13
   mosi_pin: 14
