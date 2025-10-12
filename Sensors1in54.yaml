@@ -20,7 +20,7 @@ ota:
     password: "7130c7e79d962dbfb5de903987e64224"
 
 wifi:
-  ssid: !secret wifi_ssid # create a file called secret, then enter two lines of wifi_ssid and wifi_password example line wifi_ssid: "yourSSID", repeat for password
+  ssid: !secret wifi_ssid
   password: !secret wifi_password
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
@@ -64,9 +64,10 @@ font:
     #define EPD_RST_PIN  1
     #define EPD_DC_PIN   4
     #define EPD_BUSY_PIN 3
+
 spi:
-  clk_pin: 13
-  mosi_pin: 14
+  clk_pin: 7
+  mosi_pin: 9
   
 #time:
 #  - platform: sntp
@@ -110,38 +111,40 @@ sensor:
   - platform: homeassistant
     name: Charge
     entity_id: sensor.battery_charge
-    id: BatteryCharge # The id used to link the value for display
+    id: BatteryCharge
 
 display:
   - platform: waveshare_epaper # Pin numbers set for Waveshare driver board: https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
     id: waveshare
-    cs_pin: 15
-    dc_pin: 27
-    busy_pin: 25
-    reset_pin: 26
-    model: 1.54in-m5coreink-m09 # You must select the correct chip-set, if needs be go through all variants to find a match
-    update_interval: 2min
+    cs_pin: 2
+    dc_pin: 4
+    busy_pin: 3
+    reset_pin: 1
+    model: 1.54in-m5coreink-m09
+    update_interval: 1min
     rotation: 270
     lambda: |-
-      it.print(50, 0, id(font3), "Sensor Readings");
+      it.print(100, 10, id(font3), TextAlign::CENTER, "Sensor Readings");
 
       auto time = id(ha_time).now();
-      it.strftime(55, 20, id(font3), "Updated: %H:%M", time);
-      it.printf(62, 40, id(font3), " CPU: %0.1f °C", id(cputemp).state);  
+      it.strftime(100, 28, id(font3), TextAlign::CENTER, "Updated: %H:%M", time);
+      it.printf(102, 45, id(font3), TextAlign::CENTER, "CPU: %0.1f °C", id(cputemp).state);  
 
       it.printf(5, 70, id(font3), "Grid Power");
-      it.printf(28, 85, id(font3), "%.0f W", id(GridPower).state);
+      it.printf(40, 95, id(font3), TextAlign::CENTER, "%.0f W", id(GridPower).state);
       
       it.printf(110, 70, id(font3), "Solar Pwr");
-      it.printf(115, 85, id(font3), "%.0f W", id(SolarPower).state);
+      it.printf(140, 95, id(font3), TextAlign::CENTER, "%.0f W", id(SolarPower).state);
 
       it.printf(5, 110, id(font3), "Battery Pwr");
-      it.printf(22, 125, id(font3), "%.0f W", id(BatteryPower).state);
+      it.printf(40, 135, id(font3), TextAlign::CENTER, "%.0f W", id(BatteryPower).state);
 
       it.printf(110, 110, id(font3), "Battery SoC");
-      it.printf(130, 125, id(font3), "%.1f%%", id(BatteryCharge).state);  
+      it.printf(148, 135, id(font3), TextAlign::CENTER, "%.1f%%", id(BatteryCharge).state);  
       
-      it.printf(28, 180, id(font3), "Outside Temp: %0.1f °C", id(outside_temp).state);
+      it.printf(100, 192, id(font3), TextAlign::CENTER, "Outside Temp: %0.1f °C", id(outside_temp).state);
 
 #      it.printf(20, 50, id(font3), " CPU Temp: %0.1f °C", id(cputemp).state);  
 #      float cputemp = id(cpu_temp).state;
+
+    
