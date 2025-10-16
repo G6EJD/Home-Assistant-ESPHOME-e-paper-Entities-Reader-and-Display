@@ -26,3 +26,5 @@ Open the black clip on the display socket.Plug your display into the board, then
 9. NOW, choose INSTALL again, and the PLUGGED INTO THIS COMPUTER option.
 10. Select the web inteface, then select your device USB port, now follow the instructions to select your firmware file, then install.
 11. That's it...
+
+![alt_text, width="400"](/IMG_0510.jpg)
